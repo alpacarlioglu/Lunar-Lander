@@ -6,7 +6,7 @@ import numpy as np
 import os
 
 class LunarLanderTrainer:
-    def __init__(self, env_name="LunarLander-v2"):
+    def __init__(self, env_name="LunarLander-v3"):
         # Create and normalize the environment (important for performance)
         self.env = DummyVecEnv([lambda: gym.make(env_name)])
         self.env = VecNormalize(self.env, norm_obs=True, norm_reward=True)
