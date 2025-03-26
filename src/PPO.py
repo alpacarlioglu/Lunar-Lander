@@ -59,7 +59,7 @@ class LunarLanderTrainer:
     def evaluate(self, episodes=10, render=False):
         """Evaluate the model's performance"""
         # Create evaluation environment
-        eval_env = gym.make("LunarLander-v2", render_mode="human" if render else None)
+        eval_env = gym.make("LunarLander-v3", render_mode="human" if render else None)
         eval_env = DummyVecEnv([lambda: eval_env])
         
         # Load normalization stats
@@ -75,9 +75,17 @@ class LunarLanderTrainer:
             
             while not done:
                 action, _ = self.model.predict(obs, deterministic=True)
-                obs, reward, terminated, truncated, _ = eval_env.step(action)
+                step_result = eval_env.step(action)
+                
+                # Handle both old and new gym API formats
+                if len(step_result) == 4:  # Old format: obs, reward, done, info
+                    obs, reward, done_array, _ = step_result
+                    done = done_array[0]
+                else:  # New format: obs, reward, terminated, truncated, info
+                    obs, reward, terminated, truncated, _ = step_result
+                    done = terminated[0] or truncated[0]
+                
                 episode_reward += reward[0]  # Unwrap the reward
-                done = terminated[0] or truncated[0]
             
             rewards.append(episode_reward)
             print(f"Episode {episode + 1}: Reward = {episode_reward:.2f}")
